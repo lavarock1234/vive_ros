@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cmath>
 #include <ros/ros.h>
 #include <signal.h>
@@ -6,9 +7,11 @@
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/JoyFeedback.h>
 #include <std_srvs/Empty.h>
-#include <iostream>
-#include "vive_ros/vr_interface.h"
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
+#include "vive_ros/vr_interface.h"
 
 using namespace std;
 
@@ -460,6 +463,7 @@ class VIVEnode
     ros::Publisher twist2_pub_;
     std::map<std::string, ros::Publisher> button_states_pubs_map;
     ros::Subscriber feedback_sub_;
+    std::map<std::string, ros::Publisher> odom_pubs_;
 
 };
 
@@ -649,6 +653,15 @@ void VIVEnode::Run()
       if (dev_type == 3)
       {
         tf_broadcaster_.sendTransform(tf::StampedTransform(tf, ros::Time::now(), "world_vive", "tracker_"+cur_sn));
+
+        if(!odom_pubs_.count("tracker_" + cur_sn)) {
+          odom_pubs_["tracker_" + cur_sn] = nh_.advertise<nav_msgs::Odometry>("/vive/tracker_"+cur_sn+"/odom", 10);
+        }
+        nav_msgs::Odometry odom;
+        odom.header.stamp = ros::Time::now();
+        odom.header.frame_id = "world_vive";
+        tf::poseTFToMsg(tf, odom.pose.pose);
+        odom_pubs_["tracker_" + cur_sn].publish(odom);
       }
       // It's a lighthouse
       if (dev_type == 4)
@@ -792,7 +805,7 @@ int main(int argc, char** argv){
 #ifdef USE_IMAGE
   VIVEnode nodeApp(90); // VIVE display max fps
 #else
-  VIVEnode nodeApp(30);
+  VIVEnode nodeApp(100);
 #endif
   if (!nodeApp.Init()){
     nodeApp.Shutdown();
