@@ -80,6 +80,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   cv_bridge
   image_transport
+  nav_msgs
 )
 
 set(CMAKE_BUILD_TYPE "Release")
