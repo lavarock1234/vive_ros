@@ -4,6 +4,8 @@
   <rosparam param="/vive/world_offset">[0, 0, 2.265]</rosparam>
   <rosparam param="/vive/world_yaw">0.0</rosparam>
 
+  <include file="$(find vive_ros)/launch/server_vr.launch"/>
+
   <node name="vive_node" pkg="vive_ros" type="vive_node" launch-prefix="$(find vive_ros)/scripts/find_steam_runtime.sh" output="screen" required="true"/>
 
 </launch>
