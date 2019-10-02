@@ -526,6 +526,9 @@ bool VIVEnode::Init()
 void VIVEnode::Shutdown()
 {
   vr_.Shutdown();
+
+  std::cout << "Shutting down VR server!\n";
+  std::system("rosrun vive_ros close_servervr.sh");
 }
 
 bool VIVEnode::setOriginCB(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
@@ -748,7 +751,7 @@ void VIVEnode::Run()
     pMainApplication->RenderFrame();
 #endif
 
-    ROS_INFO_THROTTLE(1.0,"Run() @ %d [fps]", [](int& cin){int ans = cin; cin=0; return ans;}(run_hz_count));
+    ROS_DEBUG_THROTTLE(1.0,"Run() @ %d [fps]", [](int& cin){int ans = cin; cin=0; return ans;}(run_hz_count));
     run_hz_count++;
     ros::spinOnce();
     loop_rate_.sleep();
