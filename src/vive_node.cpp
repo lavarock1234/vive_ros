@@ -590,9 +590,6 @@ void VIVEnode::Run()
     // do stuff
     vr_.Update();
 
-    int controller_count = 1;
-    int tracker_count = 1;
-    int lighthouse_count = 1;
     for (int i=0; i<vr::k_unMaxTrackedDeviceCount; i++)
     {
       int dev_type = vr_.GetDeviceMatrix(i, tf_matrix);
@@ -651,6 +648,15 @@ void VIVEnode::Run()
           button_states_pubs_map[cur_sn] = nh_.advertise<sensor_msgs::Joy>("/vive/controller_"+cur_sn+"/joy", 10);
         }
         button_states_pubs_map[cur_sn].publish(joy);
+
+        if(!odom_pubs_.count("tracker_" + cur_sn)) {
+          odom_pubs_["tracker_" + cur_sn] = nh_.advertise<nav_msgs::Odometry>("/vive/tracker_"+cur_sn+"/odom", 10);
+        }
+        nav_msgs::Odometry odom;
+        odom.header.stamp = ros::Time::now();
+        odom.header.frame_id = "world_vive";
+        tf::poseTFToMsg(tf, odom.pose.pose);
+        odom_pubs_["tracker_" + cur_sn].publish(odom);
       }
       // It's a tracker
       if (dev_type == 3)
